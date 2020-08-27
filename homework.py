@@ -33,7 +33,11 @@ class Calculator:
 
     def get_week_stats(self):
         week = TODAY - dt.timedelta(days = 7)
-        return sum(record.amount for record in self.records if week.date() <= record.date <= TODAY.date())
+        return sum(
+            record.amount 
+            for record in self.records 
+            if week.date() <= record.date <= TODAY.date()
+            )
 
 class CaloriesCalculator(Calculator):
     ANSWER = ('Сегодня можно съесть что-нибудь ещё,'
