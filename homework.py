@@ -33,23 +33,18 @@ class Calculator:
 
     def get_week_stats(self):
         week = TODAY - dt.timedelta(days = 7)
-        return sum(
-            record.amount 
-            for record in self.records 
-            if week.date() <= record.date <= self.TODAY.date()
-            )
+        return sum(record.amount for record in self.records if week.date() <= record.date <= TODAY.date())
 
 class CaloriesCalculator(Calculator):
     ANSWER = ('Сегодня можно съесть что-нибудь ещё,'
-             'но с общей калорийностью не более {value} кКал')
+             ' но с общей калорийностью не более {value} кКал')
 
-    def get_calories_remained(self):
-        self.remain = self.get_today_stats()
-        if self.remain < self.limit:
-            self.remain = self.limit - self.remain
+    def get_calories_remained(self): 
+        self.remain = self.limit - self.get_today_stats() 
+        if self.remain > 0:
             return self.ANSWER.format(value = self.remain)
-        else:
-            return 'Хватит есть!'
+        else: 
+            return  'Хватит есть!' 
 
 class CashCalculator(Calculator):
     USD_RATE = 60.0
@@ -59,7 +54,7 @@ class CashCalculator(Calculator):
     ANSWER_NEG = 'Денег нет, держись: твой долг - {value} {cur}'
 
     rate_dict = {
-        'usd':(USD_RATE,'UDS'),
+        'usd':(USD_RATE,'USD'),
         'eur':(EURO_RATE,'Euro'),
         'rub':(RUB_RATE,'руб')
     }
@@ -79,3 +74,14 @@ class CashCalculator(Calculator):
             return self.ANSWER_NEG.format(value = abs(remains), cur = rate_name)
         else:
             return 'Денег нет, держись'
+
+cash_calculator = CaloriesCalculator(1000)
+        
+# дата в параметрах не указана, 
+# так что по умолчанию к записи должна автоматически добавиться сегодняшняя дата
+cash_calculator.add_record(Record(amount=1000, comment="кофе")) 
+# и к этой записи тоже дата должна добавиться автоматически
+cash_calculator.add_record(Record(amount=0, comment="Серёге за обед"))
+# а тут пользователь указал дату, сохраняем её
+                
+print(cash_calculator.get_calories_remained())
