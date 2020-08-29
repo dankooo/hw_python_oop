@@ -23,21 +23,21 @@ class Calculator:
         self.records.append(Record)
         return self.records
 
-    def get_today_stats(self):
-        TODAY = dt.datetime.now()
+    def get_today_stats(self):   
+        today = dt.date.today()
         return sum(
             record.amount 
             for record in self.records 
-            if record.date == TODAY.date()
+            if record.date == today
             )
 
     def get_week_stats(self):
-        TODAY = dt.datetime.now()
-        week = TODAY.date() - dt.timedelta(days = 7)
+        today = dt.date.today()
+        week = today - dt.timedelta(days = 7)
         return sum(
             record.amount 
             for record in self.records 
-            if week.date() <= record.date <= TODAY.date()
+            if week <= record.date <= today
             )
 
 class CaloriesCalculator(Calculator):
@@ -70,9 +70,9 @@ class CashCalculator(Calculator):
         spent = self.get_today_stats()
         rate, name = self.RATE_DICT[currency]
         remains = round((self.limit - spent) / rate, 2)
-        if spent > 0:
+        if spent < self.limit:
             return self.ANSWER_POS.format(value = remains, cur = name) 
-        elif spent < 0:
+        elif spent > self.limit:
             return self.ANSWER_NEG.format(value = abs(remains), cur = name)
         else:
             return self.ANSWER_NULL
