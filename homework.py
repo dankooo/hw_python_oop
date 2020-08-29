@@ -14,8 +14,7 @@ class Record:
         self.comment = comment 
 
 class Calculator:
-    TODAY = dt.datetime.now()
-
+    
     def __init__(self,limit):
         self.limit = limit
         self.records = []
@@ -24,19 +23,21 @@ class Calculator:
         self.records.append(Record)
         return self.records
 
-    def get_today_stats(self):   
+    def get_today_stats(self):
+        TODAY = dt.datetime.now()
         return sum(
             record.amount 
             for record in self.records 
-            if record.date == self.TODAY.date()
+            if record.date == TODAY.date()
             )
 
     def get_week_stats(self):
-        week = self.TODAY - dt.timedelta(days = 7)
+        TODAY = dt.datetime.now()
+        week = TODAY.date() - dt.timedelta(days = 7)
         return sum(
             record.amount 
             for record in self.records 
-            if week.date() <= record.date <= self.TODAY.date()
+            if week.date() <= record.date <= TODAY.date()
             )
 
 class CaloriesCalculator(Calculator):
@@ -57,6 +58,7 @@ class CashCalculator(Calculator):
     RUB_RATE = 1.0
     ANSWER_POS = 'На сегодня осталось {value} {cur}'
     ANSWER_NEG = 'Денег нет, держись: твой долг - {value} {cur}'
+    ANSWER_NULL = 'Денег нет, держись'
 
     RATE_DICT = {
         'usd':(USD_RATE,'USD'),
@@ -65,17 +67,12 @@ class CashCalculator(Calculator):
     }
 
     def get_today_cash_remained(self, currency):
-        remained = self.get_today_stats()
+        spent = self.get_today_stats()
         rate, name = self.RATE_DICT[currency]
-        remains = round(
-            self.limit / rate
-            - 
-            remained / rate, 
-            2
-            )
-        if remained < self.limit:
+        remains = round((self.limit - spent) / rate, 2)
+        if spent > 0:
             return self.ANSWER_POS.format(value = remains, cur = name) 
-        elif remained > self.limit:
+        elif spent < 0:
             return self.ANSWER_NEG.format(value = abs(remains), cur = name)
         else:
-            return 'Денег нет, держись'
+            return self.ANSWER_NULL
